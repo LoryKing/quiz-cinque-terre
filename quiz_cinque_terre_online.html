@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Cinque Terre</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #eaf2f8; }
+    h1 { text-align: center; }
+    .quiz-container { max-width: 700px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .question { margin-bottom: 20px; }
+    .options { list-style: none; padding: 0; }
+    .options li { margin: 10px 0; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    .hidden { display: none; }
+    .result { font-weight: bold; font-size: 18px; text-align: center; margin-top: 30px; }
+    .coupon { font-size: 22px; color: green; margin-top: 10px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Quiz sulle Cinque Terre</h1>
+  <div class="quiz-container">
+    <div id="quiz"></div>
+    <button id="nextBtn">Avanti</button>
+    <div class="result hidden" id="result"></div>
+  </div>
+
+  <script>
+    const quiz = [
+      {
+        domanda: "Qual è il borgo più piccolo delle Cinque Terre per popolazione?",
+        opzioni: ["Corniglia", "Manarola", "Vernazza"],
+        corretta: "Corniglia"
+      },
+      {
+        domanda: "In quale borgo si trova la famosa spiaggia di Fegina?",
+        opzioni: ["Riomaggiore", "Monterosso", "Manarola"],
+        corretta: "Monterosso"
+      },
+      {
+        domanda: "Qual è il nome del sentiero che collega tutti i borghi delle Cinque Terre?",
+        opzioni: ["Sentiero Azzurro", "Via dell'Amore", "Strada delle Cinque"],
+        corretta: "Sentiero Azzurro"
+      },
+      {
+        domanda: "In quale secolo è stato istituito il Parco Nazionale delle Cinque Terre?",
+        opzioni: ["XX", "XIX", "XXI"],
+        corretta: "XX"
+      },
+      {
+        domanda: "Quale delle Cinque Terre è famosa per avere una terrazza panoramica sul mare chiamata ‘La Marina’?",
+        opzioni: ["Riomaggiore", "Corniglia", "Manarola"],
+        corretta: "Manarola"
+      }
+    ];
+
+    let indice = 0;
+    let punteggio = 0;
+    const quizEl = document.getElementById("quiz");
+    const nextBtn = document.getElementById("nextBtn");
+    const resultEl = document.getElementById("result");
+
+    if (localStorage.getItem("quizBloccato")) {
+      quizEl.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+      resultEl.classList.remove("hidden");
+      resultEl.innerHTML = "⛔ Hai già tentato il quiz e non puoi riprovarlo.";
+    } else {
+      mostraDomanda();
+
+      nextBtn.addEventListener("click", () => {
+        const scelta = document.querySelector('input[name="risposta"]:checked');
+        if (!scelta) {
+          alert("Seleziona una risposta per continuare.");
+          return;
+        }
+
+        if (scelta.value === quiz[indice].corretta) {
+          punteggio++;
+        }
+
+        indice++;
+        if (indice < quiz.length) {
+          mostraDomanda();
+        } else {
+          localStorage.setItem("quizBloccato", "true");
+          quizEl.classList.add("hidden");
+          nextBtn.classList.add("hidden");
+          resultEl.classList.remove("hidden");
+
+          if (punteggio === quiz.length) {
+            resultEl.innerHTML = "🎉 Complimenti! Hai risposto correttamente a tutte le domande!<br>" +
+                                 "<span class='coupon'>🎁 Codice sconto: <strong>10EURO</strong></span>";
+          } else {
+            resultEl.innerHTML = `Hai risposto correttamente a ${punteggio} su ${quiz.length} domande.<br>` +
+                                 "❌ Non puoi ripetere il quiz.";
+          }
+        }
+      });
+    }
+
+    function mostraDomanda() {
+      const q = quiz[indice];
+      quizEl.innerHTML = \`
+        <div class="question">
+          <p><strong>Domanda \${indice + 1}:</strong> \${q.domanda}</p>
+          <ul class="options">
+            \${q.opzioni.map(opt => \`<li><label><input type="radio" name="risposta" value="\${opt}"> \${opt}</label></li>\`).join('')}
+          </ul>
+        </div>
+      \`;
+    }
+  </script>
+</body>
+</html>
